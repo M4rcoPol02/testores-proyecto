@@ -26,6 +26,7 @@ BooleanMatrix::BooleanMatrix(int rows, int columns)
     this->columns = columns; 
 
     differenceMatrix = GenerateNewDifferenceMatrix(rows, columns);
+    
     BasicMatrix();
     CalcMatrixDensity();
 }
