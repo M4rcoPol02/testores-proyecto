@@ -9,8 +9,8 @@ int main()
 {
     //init random
     srand(time(0));
-    
-    BooleanMatrix booleanMatrix(5, 5);
+
+    BooleanMatrix booleanMatrix(10, 5);
     cout << "Difference Matrix: " << endl;
     PrintMatrix(booleanMatrix.differenceMatrix);
 
@@ -20,8 +20,11 @@ int main()
     cout << "Density: " << booleanMatrix.GetMatrixDensity() << endl;
 
     cout << "Starting YYC Incremental Algorithm..." << endl;
+    YYC yyc;
+
     cout << "Finding Typical Testors..." << endl;
-    RunYYCIncremental(booleanMatrix.basicMatrix);
+
+    PrintTestorsList(yyc.findTypicalTestors(booleanMatrix.basicMatrix));
 
     cout << endl;
 

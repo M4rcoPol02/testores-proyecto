@@ -1,23 +1,26 @@
-//prototipo del archivo YYC.cpp
 #ifndef YYC_H
 #define YYC_H
 
-#include<iostream>
 #include <vector>
-#include <set>
-#include <string>
-#include <chrono>
-#include "Matrix.h"
+#include <algorithm>    // necesario para sort
+using std::vector;
 
+class YYC 
+{
+public:
+    vector<vector<int>> findTypicalTestors(const vector<vector<int>>& matrix);
 
-using namespace std; 
+private:
+    bool findCompatibleSet(const vector<int>& testor, int newCol, 
+                           const vector<vector<int>>& matrix, int rowsUpTo);
 
+    vector<vector<int>> getSubmatrix(const vector<vector<int>>& matrix, 
+                                     const vector<int>& cols, int rowsUpTo);
 
-// - imprime en stdout los testores típicos para cada prefijo de filas y tiempos acumulados.
-void RunYYCIncremental(const std::vector<std::vector<int>>& matrizCompleta); // o envez pon matrix
+    bool isSubsetStrict(const vector<int>& a, const vector<int>& b);
 
-// Helper: imprime un conjunto de columnas (testor) en formato {c1,c2,...}
-void PrintTestor(const std::vector<int>& testor);
-
+    // DEBE SER static PARA PODER PASAR A sort
+    static bool compareBySizeThenLex(const vector<int>& a, const vector<int>& b);
+};
 
 #endif

@@ -2,6 +2,7 @@
 #include <vector>
 #include <algorithm>
 #include <iostream>
+#include "ExecutionTime.h"
 
 using namespace std;
 
@@ -13,17 +14,28 @@ void BT::StartingRow() {
 }
 
 
-void BT::NextRow(int skip) {
+void BT::NextRow(int skip) 
+{
     int value = 0;
-    for (int bit : currentRow) value = (value << 1) | bit;
+    int digitMultiplier{1};
+
+    //convertir el vector binario a decimal
+    for (int bits{currentRow.size() - 1}; bits >= 0 ; bits--)
+    {
+        value += currentRow[bits] * digitMultiplier;
+        digitMultiplier *= 2;
+    }
 
     value += skip;
 
+    //bitwise left shift operator << . returns in decimal. 
+    //columns = 4, 10000 - 1 = 1111 = 15 in decimal
     int maxValue = (1 << columns) - 1;
     if (value > maxValue) {
-        value = maxValue; 
+        value = maxValue;
     }
 
+    //si value == maxValue, ya es la última fila
     currentRow.clear();
     for (int i = columns - 1; i >= 0; i--) {
         currentRow.push_back((value >> i) & 1);
@@ -31,16 +43,21 @@ void BT::NextRow(int skip) {
 }
 
 
-//1.3
-bool BT::IsTestor(const vector<vector<int>>& basicMatrix) {
-    for (const auto& mbRow : basicMatrix) {
+//proposicion 1.3
+bool BT::IsTestor(const vector<vector<int>>& basicMatrix) 
+{
+    for (const vector<int>& mbRow : basicMatrix) {
         bool coversRow = false;
+        //compara todas las filas de la basic matrix con la fila actual.
         for (int j = 0; j < columns; j++) {
+
+            //revisa que en cada fila de la matriz basica existe al menos un 1 que comparta con la fila actual.
             if (currentRow[j] == 1 && mbRow[j] == 1) {
                 coversRow = true;
                 break;
             }
         }
+        //si en algun punto coversRow es falso, entonces no es un testor.
         if (!coversRow) return false;
     }
     return true;
@@ -55,6 +72,8 @@ int BT::CalculateSkipProp1_4() {
     if (lastOnePos == -1) return 0; 
 
     int k = columns - lastOnePos - 1; 
+
+    //2^k -1
     return (1 << k) - 1; 
 }
 
@@ -62,9 +81,12 @@ int BT::CalculateSkipProp1_4() {
 int BT::CalculateSkipProp1_5(const vector<vector<int>>& basicMatrix) {
     vector<int> failingRows;
 
+    //itera por cada fila
     for (int i = 0; i < basicMatrix.size(); i++) {
         bool fails = true;
+        //itera por cada columna
         for (int j = 0; j < columns; j++) {
+            //si es que en la fila de la matriz basica y en la fila actual hay un 1 en la misma columna, entonces no falla
             if (basicMatrix[i][j] == 1 && currentRow[j] == 1) {
                 fails = false;
                 break;
@@ -75,10 +97,12 @@ int BT::CalculateSkipProp1_5(const vector<vector<int>>& basicMatrix) {
 
     if (failingRows.empty()) return -1; 
 
+    //uno que esta mas a la derecha
     int pivot = -1;
-    for (int rowIdx : failingRows) {
-        const auto& row = basicMatrix[rowIdx];
 
+    //encontrar el uno que mas a la derecha se encuentra de entre las filas que fallan
+    for (int rowIdx : failingRows) {
+        const vector<int>& row = basicMatrix[rowIdx];
         for (int j = columns - 1; j >= 0; j--) {
             if (row[j] == 1 && j > pivot) {
                 pivot = j;
@@ -87,6 +111,7 @@ int BT::CalculateSkipProp1_5(const vector<vector<int>>& basicMatrix) {
         }
     }
 
+    //2^bitsRight - 1
     int bitsRight = columns - pivot - 1;
     return (1 << bitsRight) - 1; 
 }
@@ -99,14 +124,16 @@ bool BT::IsLastRow() const {
 }
 
 vector<vector<int>> BT::FindTypicalTestors(const vector<vector<int>>& basicMatrix) {
+    ExecutionTime t{"Tiempo de ejecucion BT"};  
     vector<vector<int>> typicalTestors;
-
+    
     StartingRow();
 
     while (true) {
         if (IsTestor(basicMatrix)) {
+
             bool isTypical = true;
-            for (const auto& t : typicalTestors) {
+            for (const vector<int>& t : typicalTestors) {
                 bool subset = true;
                 for (int j = 0; j < columns; j++) {
                     if (t[j] == 1 && currentRow[j] == 0) {
@@ -124,9 +151,9 @@ vector<vector<int>> BT::FindTypicalTestors(const vector<vector<int>>& basicMatri
                 typicalTestors.push_back(currentRow);
 
                 vector<vector<int>> filtered;
-                for (auto& t : typicalTestors) {
+                for (vector<int>& t : typicalTestors) {
                     bool superset = false;
-                    for (auto& o : typicalTestors) {
+                    for (vector<int>& o : typicalTestors) {
                         if (t != o) {
                             bool isSuperset = true;
                             for (int j = 0; j < columns; j++) {
@@ -162,4 +189,3 @@ vector<vector<int>> BT::FindTypicalTestors(const vector<vector<int>>& basicMatri
 
     return typicalTestors;
 }
-

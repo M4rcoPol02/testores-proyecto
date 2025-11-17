@@ -2,20 +2,69 @@
 #include<string>
 #include<vector>
 #include"Matrix.h"
+#include<iomanip>
 
 using namespace std;
 
 
-void PrintMatrix(vector<vector<int>> matrix)
+void PrintMatrix(const vector<vector<int>>& matrix)
 {
-    for (int i{}; i < matrix.size(); i++)
-    {
-        for (int j{}; j < matrix.at(i).size(); j++)
-        {
-            cout << matrix.at(i).at(j) << " ";
+    if (matrix.empty()) {
+        cout << "Matrix is empty!" << endl;
+        return;
+    }
+    
+    int rows = matrix.size();
+    int cols = matrix[0].size();
+    
+    // Calculate the maximum row number digits
+    int maxRowDigits = to_string(rows).length();
+    int rowLabelWidth = maxRowDigits + 1; // "f" + digits
+    
+    // Print column headers with proper spacing
+    cout << string(rowLabelWidth + 1, ' '); // Space for row labels + extra
+    for (int col = 0; col < cols; col++) {
+        cout << "c" << (col + 1) << " ";
+    }
+    cout << endl;
+    
+    // Print separator line that matches exactly
+    cout << string(rowLabelWidth + 1, ' ');
+    for (int col = 0; col < cols; col++) {
+        cout << "---";
+    }
+    cout << endl;
+    
+    // Print matrix with perfectly aligned row labels
+    for (int row = 0; row < rows; row++) {
+        // Print row label with consistent width
+        cout << "f" << (row + 1) 
+             << string(rowLabelWidth - to_string(row + 1).length() - 1, ' ')
+             << "|";
+        
+        // Print row data
+        for (int col = 0; col < cols; col++) {
+            cout << " " << matrix[row][col] << " ";
         }
-
         cout << endl;
+    }
+}
+
+void PrintTestorsList(const vector<vector<int>>& testors) {
+    if (testors.empty()) {
+        cout << "No se encontraron testores\n";
+        return;
+    }
+    
+    for (size_t i = 0; i < testors.size(); i++) {
+        cout << "f" << (i + 1) << " (";
+        for (size_t j = 0; j < testors[i].size(); j++) {
+            cout << "c" << (testors[i][j] + 1);
+            if (j < testors[i].size() - 1) {
+                cout << ",";
+            }
+        }
+        cout << ")\n";
     }
 }
  
@@ -79,7 +128,7 @@ void BooleanMatrix::BasicMatrix()
     this->basicMatrix = basicMatrix;
 }
 
-bool BooleanMatrix::IsBSubRowOfA(vector<int> rowA, vector<int> rowB)
+bool BooleanMatrix::IsBSubRowOfA(const vector<int>& rowA, const vector<int>& rowB)
 {
     bool isBLessThanA{false};
 

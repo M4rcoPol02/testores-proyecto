@@ -9,7 +9,9 @@
 using namespace std;
 
 
-void PrintMatrix(vector<vector<int>> matrix);
+void PrintMatrix(const vector<vector<int>>& matrix);
+
+void PrintTestorsList(const vector<vector<int>>& testors); 
 
 class BooleanMatrix
 {
@@ -18,7 +20,7 @@ class BooleanMatrix
     float density;
     vector<vector<int>> GenerateNewDifferenceMatrix(int rows, int columns);
     void BasicMatrix();
-    bool IsBSubRowOfA(vector<int> rowA, vector<int> rowB);
+    bool IsBSubRowOfA(const vector<int>& rowA, const vector<int>& rowB);
     void CalcMatrixDensity();
 
     public:
