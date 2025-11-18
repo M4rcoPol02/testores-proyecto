@@ -1,191 +1,197 @@
 #include "BT.h"
-#include <vector>
 #include <algorithm>
-#include <iostream>
+#include <stdexcept>
 #include "ExecutionTime.h"
 
-using namespace std;
-
-BT::BT(int cols) : columns(cols) {}
-
-void BT::StartingRow() {
-    currentRow.assign(columns, 0);
-    currentRow.back() = 1;
+BT::BT(int numColumns) : n(numColumns) {
+    if (n <= 0 || n > 60)
+        throw std::invalid_argument("numColumns must be between 1 and 60");
 }
 
+// -------------------------------------------------------------
+// PROPOSICIÓN 1.3 - Detector de Testores
+// -------------------------------------------------------------
+bool BT::isTestor(uint64_t mask, const std::vector<std::vector<int>>& MB) const {
 
-void BT::NextRow(int skip) 
-{
-    int value = 0;
-    int digitMultiplier{1};
+    for (const auto& row : MB) {
 
-    //convertir el vector binario a decimal
-    for (int bits{currentRow.size() - 1}; bits >= 0 ; bits--)
-    {
-        value += currentRow[bits] * digitMultiplier;
-        digitMultiplier *= 2;
-    }
+        bool sharesOne = false;
 
-    value += skip;
-
-    //bitwise left shift operator << . returns in decimal. 
-    //columns = 4, 10000 - 1 = 1111 = 15 in decimal
-    int maxValue = (1 << columns) - 1;
-    if (value > maxValue) {
-        value = maxValue;
-    }
-
-    //si value == maxValue, ya es la última fila
-    currentRow.clear();
-    for (int i = columns - 1; i >= 0; i--) {
-        currentRow.push_back((value >> i) & 1);
-    }
-}
-
-
-//proposicion 1.3
-bool BT::IsTestor(const vector<vector<int>>& basicMatrix) 
-{
-    for (const vector<int>& mbRow : basicMatrix) {
-        bool coversRow = false;
-        //compara todas las filas de la basic matrix con la fila actual.
-        for (int j = 0; j < columns; j++) {
-
-            //revisa que en cada fila de la matriz basica existe al menos un 1 que comparta con la fila actual.
-            if (currentRow[j] == 1 && mbRow[j] == 1) {
-                coversRow = true;
+        for (int c = 0; c < n; ++c) {
+            uint64_t b = (1ULL << bit(c));
+            if ((mask & b) && row[c] == 1) {
+                sharesOne = true;
                 break;
             }
         }
-        //si en algun punto coversRow es falso, entonces no es un testor.
-        if (!coversRow) return false;
+
+        if (!sharesOne) return false;
     }
+
     return true;
 }
 
-//1.4
-int BT::CalculateSkipProp1_4() {
-    int lastOnePos = -1;
-    for (int j = 0; j < columns; j++) {
-        if (currentRow[j] == 1) lastOnePos = j;
-    }
-    if (lastOnePos == -1) return 0; 
+// -------------------------------------------------------------
+// Irreducible (típico)
+// -------------------------------------------------------------
+bool BT::isTypical(uint64_t mask, const std::vector<std::vector<int>>& MB) const {
 
-    int k = columns - lastOnePos - 1; 
-
-    //2^k -1
-    return (1 << k) - 1; 
-}
-
-//1.5
-int BT::CalculateSkipProp1_5(const vector<vector<int>>& basicMatrix) {
-    vector<int> failingRows;
-
-    //itera por cada fila
-    for (int i = 0; i < basicMatrix.size(); i++) {
-        bool fails = true;
-        //itera por cada columna
-        for (int j = 0; j < columns; j++) {
-            //si es que en la fila de la matriz basica y en la fila actual hay un 1 en la misma columna, entonces no falla
-            if (basicMatrix[i][j] == 1 && currentRow[j] == 1) {
-                fails = false;
-                break;
-            }
-        }
-        if (fails) failingRows.push_back(i);
-    }
-
-    if (failingRows.empty()) return -1; 
-
-    //uno que esta mas a la derecha
-    int pivot = -1;
-
-    //encontrar el uno que mas a la derecha se encuentra de entre las filas que fallan
-    for (int rowIdx : failingRows) {
-        const vector<int>& row = basicMatrix[rowIdx];
-        for (int j = columns - 1; j >= 0; j--) {
-            if (row[j] == 1 && j > pivot) {
-                pivot = j;
-                break;
-            }
+    for (int c = 0; c < n; ++c) {
+        uint64_t b = (1ULL << bit(c));
+        if (mask & b) {
+            uint64_t m2 = mask & ~b;
+            if (isTestor(m2, MB)) return false;  // reducible
         }
     }
 
-    //2^bitsRight - 1
-    int bitsRight = columns - pivot - 1;
-    return (1 << bitsRight) - 1; 
-}
-
-bool BT::IsLastRow() const {
-    for (int bit : currentRow) {
-        if (bit == 0) return false;
-    }
     return true;
 }
 
-vector<vector<int>> BT::FindTypicalTestors(const vector<vector<int>>& basicMatrix) {
-    ExecutionTime t{"Tiempo de ejecucion BT"};  
-    vector<vector<int>> typicalTestors;
-    
-    StartingRow();
+// 1 más a la derecha en una fila
+int BT::rightmostOneInRow(const std::vector<int>& row) const {
+    for (int c = n - 1; c >= 0; --c)
+        if (row[c] == 1)
+            return c;
+    return -1;
+}
 
-    while (true) {
-        if (IsTestor(basicMatrix)) {
+// 1 más a la derecha en la máscara
+int BT::rightmostOneInMask(uint64_t mask) const {
+    for (int c = n - 1; c >= 0; --c) {
+        uint64_t b = (1ULL << bit(c));
+        if (mask & b) return c;
+    }
+    return -1;
+}
 
-            bool isTypical = true;
-            for (const vector<int>& t : typicalTestors) {
-                bool subset = true;
-                for (int j = 0; j < columns; j++) {
-                    if (t[j] == 1 && currentRow[j] == 0) {
-                        subset = false;
+bool BT::isSuperset(uint64_t a, uint64_t b) const {
+    return ( (a & b) == b );
+}
+
+// -------------------------------------------------------------
+// ALGORITMO BT COMPLETO
+// -------------------------------------------------------------
+std::vector<std::vector<int>>
+BT::findTypicalTestors(const std::vector<std::vector<int>>& MB)
+{
+    ExecutionTime t{"Tiempo de ejecuciónn BT"};
+    if (MB.empty()) return {};
+    if ((int)MB[0].size() != n)
+        throw std::invalid_argument("MB columns != numColumns");
+
+    uint64_t maxMask = (1ULL << n) - 1ULL;
+
+    uint64_t mask = 1ULL;   // α inicial = [0..01]
+
+    std::vector<uint64_t> typicalMasks;
+
+    while (mask <= maxMask && mask != 0) {
+
+        // ≡ PROPOSICIÓN 1.3
+        if (isTestor(mask, MB)) {
+
+            // ¿Es típico?
+            if (isTypical(mask, MB)) {
+
+                // Eliminar todos los típicos anteriores que sean superconjuntos
+                std::vector<uint64_t> filtered;
+                for (uint64_t t : typicalMasks) {
+                    if (!isSuperset(t, mask))
+                        filtered.push_back(t);
+                }
+                typicalMasks.swap(filtered);
+
+                typicalMasks.push_back(mask);
+            }
+
+            // -------------------------------
+            // PROPOSICIÓN 1.4 - Saltar superconjuntos
+            // -------------------------------
+            int k = rightmostOneInMask(mask);
+
+            uint64_t newMask = 0;
+
+            // mantener bits < k
+            for (int c = 0; c < k; ++c) {
+                uint64_t b = (1ULL << bit(c));
+                if (mask & b) newMask |= b;
+            }
+
+            if (newMask <= mask) newMask = mask + 1;
+
+            mask = newMask;
+        }
+        else {
+
+            // -------------------------------------------
+            // PROPOSICIÓN 1.5 CORREGIDA
+            // -------------------------------------------
+            std::vector<int> guiltyRightmost;
+
+            // buscar filas culpables
+            for (const auto& row : MB) {
+
+                bool shares = false;
+                for (int c = 0; c < n; ++c) {
+                    uint64_t b = (1ULL << bit(c));
+                    if ((mask & b) && row[c] == 1) {
+                        shares = true;
                         break;
                     }
                 }
-                if (subset) {
-                    isTypical = false;
-                    break;
+
+                if (!shares) {
+                    int r = rightmostOneInRow(row);
+                    if (r >= 0)
+                        guiltyRightmost.push_back(r);
                 }
             }
 
-            if (isTypical) {
-                typicalTestors.push_back(currentRow);
-
-                vector<vector<int>> filtered;
-                for (vector<int>& t : typicalTestors) {
-                    bool superset = false;
-                    for (vector<int>& o : typicalTestors) {
-                        if (t != o) {
-                            bool isSuperset = true;
-                            for (int j = 0; j < columns; j++) {
-                                if (o[j] == 1 && t[j] == 0) {
-                                    isSuperset = false;
-                                    break;
-                                }
-                            }
-                            if (isSuperset) {
-                                superset = true;
-                                break;
-                            }
-                        }
-                    }
-                    if (!superset) filtered.push_back(t);
-                }
-                typicalTestors = filtered;
+            if (guiltyRightmost.empty()) {
+                mask++;
+                continue;
             }
 
-            // Proposition 1.4
-            int skip = CalculateSkipProp1_4();
-            NextRow(skip + 1);
-        }
-        else {
-            // Proposition 1.5
-            int skip = CalculateSkipProp1_5(basicMatrix);
-            if (skip < 0) skip = 0;
-            NextRow(skip + 1);
-        }
+            // el más pequeño (más a la izquierda)
+            int k = *std::min_element(guiltyRightmost.begin(), guiltyRightmost.end());
 
-        if (IsLastRow()) break;
+            uint64_t newMask = 0;
+
+            // indices < k se conservan
+            for (int c = 0; c < k; ++c) {
+                uint64_t b = (1ULL << bit(c));
+                if (mask & b) newMask |= b;
+            }
+
+            // índice k = 0
+
+            // indices > k = 1
+            for (int c = k + 1; c < n; ++c) {
+                uint64_t b = (1ULL << bit(c));
+                newMask |= b;
+            }
+
+            if (newMask <= mask)
+                mask++;
+            else
+                mask = newMask;
+        }
     }
 
-    return typicalTestors;
+    // ---------------------------------------------------------
+    // Convertir máscaras a testores con índices 1-based
+    // ---------------------------------------------------------
+    std::vector<std::vector<int>> result;
+
+    for (uint64_t fm : typicalMasks) {
+        std::vector<int> t;
+        for (int c = 0; c < n; ++c) {
+            uint64_t b = (1ULL << bit(c));
+            if (fm & b)
+                t.push_back(c + 1);  // 1-based
+        }
+        result.push_back(t);
+    }
+
+    return result;
 }

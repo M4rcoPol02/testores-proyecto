@@ -2,25 +2,33 @@
 #define YYC_H
 
 #include <vector>
-#include <algorithm>    // necesario para sort
-using std::vector;
 
-class YYC 
-{
+class YYC {
 public:
-    vector<vector<int>> findTypicalTestors(const vector<vector<int>>& matrix);
+    // Constructor por defecto
+    YYC(int col);
+
+
+    // Retorna la lista de testores típicos (cada testor representado como vector de índices de columnas)
+    // La matriz es una matriz booleana (0/1) organizada por filas: matrix[row][col]
+    std::vector<std::vector<int>> findTypicalTestors(const std::vector<std::vector<int>>& matrix);
 
 private:
-    bool findCompatibleSet(const vector<int>& testor, int newCol, 
-                           const vector<vector<int>>& matrix, int rowsUpTo);
+    int currentAmountOfTestors{};
+    // Comprueba si en la submatriz formada por las columnas 'testor' (ya ordenadas)
+    // y las filas hasta rowsUpTo (exclusive) existe un conjunto compatible
+    // al añadir la columna newCol. Implementa Algorithm 2 del paper.
+    bool findCompatibleSet(const std::vector<int>& testor, int newCol,
+                           const std::vector<std::vector<int>>& matrix,
+                           int rowsUpTo);
 
-    vector<vector<int>> getSubmatrix(const vector<vector<int>>& matrix, 
-                                     const vector<int>& cols, int rowsUpTo);
+    // Extrae submatriz formada por las columnas cols y filas 0..rowsUpTo-1
+    std::vector<std::vector<int>> getSubmatrix(const std::vector<std::vector<int>>& matrix,
+                                               const std::vector<int>& cols,
+                                               int rowsUpTo);
 
-    bool isSubsetStrict(const vector<int>& a, const vector<int>& b);
-
-    // DEBE SER static PARA PODER PASAR A sort
-    static bool compareBySizeThenLex(const vector<int>& a, const vector<int>& b);
+    // Utilidad: comprobar si 'a' es subconjunto propio de 'b' (ambos ordenados)
+    bool isSubsetStrict(const std::vector<int>& a, const std::vector<int>& b);
 };
 
-#endif
+#endif // YYC_H

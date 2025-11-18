@@ -1,83 +1,102 @@
-#include<iostream>
-#include<string>
-#include<vector>
-#include"Matrix.h"
-#include<iomanip>
-
+#include "Matrix.h"
+#include <iostream>
+#include <iomanip>
+#include <algorithm>
+#include <cstdlib>
 using namespace std;
 
-
-void PrintMatrix(const vector<vector<int>>& matrix)
+// ========================================
+//          CONSTRUCTORES
+// ========================================
+BooleanMatrix::BooleanMatrix(const vector<vector<int>>& matrix)
 {
-    if (matrix.empty()) {
-        cout << "Matrix is empty!" << endl;
-        return;
-    }
-    
-    int rows = matrix.size();
-    int cols = matrix[0].size();
-    
-    // Calculate the maximum row number digits
-    int maxRowDigits = to_string(rows).length();
-    int rowLabelWidth = maxRowDigits + 1; // "f" + digits
-    
-    // Print column headers with proper spacing
-    cout << string(rowLabelWidth + 1, ' '); // Space for row labels + extra
-    for (int col = 0; col < cols; col++) {
-        cout << "c" << (col + 1) << " ";
-    }
-    cout << endl;
-    
-    // Print separator line that matches exactly
-    cout << string(rowLabelWidth + 1, ' ');
-    for (int col = 0; col < cols; col++) {
-        cout << "---";
-    }
-    cout << endl;
-    
-    // Print matrix with perfectly aligned row labels
-    for (int row = 0; row < rows; row++) {
-        // Print row label with consistent width
-        cout << "f" << (row + 1) 
-             << string(rowLabelWidth - to_string(row + 1).length() - 1, ' ')
-             << "|";
-        
-        // Print row data
-        for (int col = 0; col < cols; col++) {
-            cout << " " << matrix[row][col] << " ";
-        }
-        cout << endl;
-    }
+    rows = matrix.size();
+    columns = rows > 0 ? matrix[0].size() : 0;
+    differenceMatrix = matrix;
+    BasicMatrix();
+    CalcMatrixDensity();
 }
-
-void PrintTestorsList(const vector<vector<int>>& testors) {
-    if (testors.empty()) {
-        cout << "No se encontraron testores\n";
-        return;
-    }
-    
-    for (size_t i = 0; i < testors.size(); i++) {
-        cout << "f" << (i + 1) << " (";
-        for (size_t j = 0; j < testors[i].size(); j++) {
-            cout << "c" << (testors[i][j] + 1);
-            if (j < testors[i].size() - 1) {
-                cout << ",";
-            }
-        }
-        cout << ")\n";
-    }
-}
- 
 
 BooleanMatrix::BooleanMatrix(int rows, int columns)
 {
     this->rows = rows;
-    this->columns = columns; 
-
+    this->columns = columns;
     differenceMatrix = GenerateNewDifferenceMatrix(rows, columns);
-    
     BasicMatrix();
     CalcMatrixDensity();
+}
+
+// ========================================
+//           STATIC BasicMatrix()
+// ========================================
+vector<vector<int>> BooleanMatrix::BasicMatrix(const vector<vector<int>>& matrix)
+{
+    BooleanMatrix obj(matrix);
+    return obj.basicMatrix;
+}
+
+// ========================================
+//            GENERA MATRIZ BÁSICA
+// ========================================
+void BooleanMatrix::BasicMatrix()
+{
+    vector<vector<int>> result;
+
+    for (int i = 0; i < rows; i++)
+    {
+        bool isBasic = true;
+        for (int j = 0; j < rows; j++)
+        {
+            if (i == j) continue;
+            if (IsBSubRowOfA(differenceMatrix[j], differenceMatrix[i]))
+            {
+                isBasic = false;
+                break;
+            }
+        }
+        if (isBasic)
+            result.push_back(differenceMatrix[i]);
+    }
+    basicMatrix = result;
+}
+
+// ========================================
+//     DEFINICIÓN DE SUBFILA (del texto)
+// ========================================
+bool BooleanMatrix::IsBSubRowOfA(const vector<int>& A, const vector<int>& B)
+{
+    bool strictlySmaller = false;
+    for (size_t i = 0; i < A.size(); i++)
+    {
+        if (A[i] == 0 && B[i] == 1) return false;
+        if (A[i] == 1 && B[i] == 0) strictlySmaller = true;
+    }
+    return strictlySmaller;
+}
+
+// ========================================
+//        GENERA MATRIZ DE DIFERENCIA
+// ========================================
+vector<vector<int>> BooleanMatrix::GenerateNewDifferenceMatrix(int rows, int columns)
+{
+    vector<vector<int>> m(rows, vector<int>(columns));
+    for (auto& r : m)
+        for (auto& v : r)
+            v = rand() % 2;
+    return m;
+}
+
+// ========================================
+//            MATRIZ DE DENSIDAD
+// ========================================
+void BooleanMatrix::CalcMatrixDensity()
+{
+    int ones = 0;
+    for (auto& r : differenceMatrix)
+        for (auto v : r)
+            if (v == 1) ones++;
+
+    density = float(ones) / float(rows * columns);
 }
 
 float BooleanMatrix::GetMatrixDensity()
@@ -85,81 +104,80 @@ float BooleanMatrix::GetMatrixDensity()
     return density;
 }
 
-
-vector<vector<int>> BooleanMatrix::GenerateNewDifferenceMatrix(int rows, int columns)
+// ========================================
+//   CONVERTIR TESTORES A MATRIZ BOOLEANA
+// ========================================
+vector<vector<int>> BooleanMatrix::TestorsToMatrix(const vector<vector<int>>& testors, int numColumns)
 {
-    vector<vector<int>> randDifferenceMatrix(rows, vector<int>(columns));
-    for (int i{}; i < rows; i++)
+    vector<vector<int>> result;
+    for (const auto& t : testors)
     {
-        for (int j{}; j < columns; j++)
-        { 
-            randDifferenceMatrix.at(i).at(j) = rand() % 2;
-        }
+        vector<int> row(numColumns, 0);
+        for (int col : t) row[col] = 1;
+        result.push_back(row);
+    }
+    return result;
+}
+
+// ========================================
+//           IMPRIMIR MATRIZ
+// ========================================
+// ========================================
+//           IMPRIMIR MATRIZ (MEJORADA)
+// ========================================
+void PrintMatrix(const vector<vector<int>>& matrix)
+{
+    if (matrix.empty()) {
+        cout << "Matriz vacia\n";
+        return;
+    }
+
+    int rows = matrix.size();
+    int cols = matrix[0].size();
+
+    // Encabezado informativo
+    cout << "Matriz: " << rows << " filas x " << cols << " columnas\n";
+
+    // Encabezado de columnas
+    cout << "    ";
+    for (int j = 0; j < cols; j++)
+        cout << setw(2) << j + 1 << " ";
+    cout << "\n    ";
+    for (int j = 0; j < cols; j++)
+        cout << "---";
+    cout << endl;
+
+    // Imprimir filas con formato consistente
+    for (int i = 0; i < rows; i++) {
+        // Etiqueta de fila alineada
+        cout << setw(2) << i + 1 << " |";
         
-    }
-    return randDifferenceMatrix;
-    
-}
-void BooleanMatrix::BasicMatrix()
-{
-    vector<vector<int>> basicMatrix;
-
-    for (int i{}; i < rows; i++)
-    {
-        bool isBasic{true};
-
-        for (int j = 0; j < rows; j++)
-        {
-            if(i == j) continue;
-            if(IsBSubRowOfA(differenceMatrix.at(j), differenceMatrix.at(i)))
-            {
-                isBasic = false;
-            }
+        // Contenido de la fila
+        for (int j = 0; j < cols; j++) {
+            cout << " " << matrix[i][j] << " ";
         }
-
-        if(isBasic)
-        {
-            basicMatrix.push_back(differenceMatrix.at(i));
-        }
+        cout << endl;
     }
-
-    
-    
-    this->basicMatrix = basicMatrix;
 }
 
-bool BooleanMatrix::IsBSubRowOfA(const vector<int>& rowA, const vector<int>& rowB)
+// ========================================
+//         IMPRIMIR TESTORES
+// ========================================
+void PrintTestorsList(const vector<vector<int>>& testors)
 {
-    bool isBLessThanA{false};
-
-    for (int i{}; i < columns; i++)
-    {
-        if(rowA.at(i) == 0 && rowB.at(i) == 1)
-        {
-            return false;
-        }
-        else if(rowA.at(i) == 1 && rowB.at(i) == 0)
-        {
-            isBLessThanA = true;
-        }
+    if (testors.empty()) {
+        cout << "No testores encontrados\n";
+        return;
     }
 
-    return isBLessThanA;
-    
-}
-void BooleanMatrix::CalcMatrixDensity()
-{
-    int countOnes{0};
-    for (int i{}; i < rows; i++)
+    for (size_t i = 0; i < testors.size(); i++)
     {
-        for (int j{}; j < columns; j++)
+        cout << "T" << i + 1 << ": (";
+        for (size_t j = 0; j < testors[i].size(); j++)
         {
-            if(differenceMatrix.at(i).at(j) == 1)
-            {
-                countOnes++;
-            }
+            cout << "c" << (testors[i][j]);
+            if (j + 1 < testors[i].size()) cout << ",";
         }
+        cout << ")\n";
     }
-
-    this->density = float(countOnes) / float((rows * columns));
 }
