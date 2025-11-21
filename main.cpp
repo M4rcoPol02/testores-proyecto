@@ -285,10 +285,6 @@ void createSection52Tables() {
     auto MB_A = BooleanMatrix::BasicMatrix(matrixA);
     auto MB_B = BooleanMatrix::BasicMatrix(matrixB);
     
-    // Create YYC and BT instances to pass to timing functions
-    YYC yyc_instance(MB_A[0].size());
-    BT bt_instance(MB_A[0].size());
-    
     BT bt_A(MB_A[0].size());
     BT bt_B(MB_B[0].size());
     
@@ -302,11 +298,11 @@ void createSection52Tables() {
     vector<vector<int>> testorsB = convertTestorsFormat(testorsB_raw, matrixB[0].size());
     
     cout << "\n--- TABLA 5.2.1: OPERADOR PHI (φ^N(θ(A,B))) ---\n";
-    auto phiResults = MatrixOperators::analyze_timing_phi_series(matrixA, matrixB, testorsA, testorsB, 5, yyc_instance, bt_instance);
+    auto phiResults = MatrixOperators::analyze_timing_phi_series(matrixA, matrixB, testorsA, testorsB, 5);
     cout << MatrixOperators::format_timing_table(phiResults) << endl;
-    
+
     cout << "\n--- TABLA 5.2.2: OPERADOR GAMMA (γ^N(θ(A,B))) ---\n";
-    auto gammaResults = MatrixOperators::analyze_timing_gamma_series(matrixA, matrixB, testorsA, testorsB, 4, yyc_instance, bt_instance);
+    auto gammaResults = MatrixOperators::analyze_timing_gamma_series(matrixA, matrixB, testorsA, testorsB, 4);
     cout << MatrixOperators::format_timing_table(gammaResults) << endl;
     
     cout << "=== TABLAS SECCION 5.2 COMPLETADAS ===\n";

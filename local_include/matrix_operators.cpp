@@ -76,7 +76,7 @@ int MatrixOperators::predict_gamma_theta_testors_count(const std::vector<std::ve
     return static_cast<int>(std::pow(base_testors, N));
 }
 
-std::vector<TimingAnalysis> MatrixOperators::analyze_timing_phi_series(const std::vector<std::vector<int>>& A, const std::vector<std::vector<int>>& B, const std::vector<std::vector<int>>& typical_testors_A, const std::vector<std::vector<int>>& typical_testors_B, int max_N, YYC& yyc_instance, BT& bt_instance) {
+std::vector<TimingAnalysis> MatrixOperators::analyze_timing_phi_series(const std::vector<std::vector<int>>& A, const std::vector<std::vector<int>>& B, const std::vector<std::vector<int>>& typical_testors_A, const std::vector<std::vector<int>>& typical_testors_B, int max_N) {
     std::vector<TimingAnalysis> results;
     auto theta_AB = theta_operator(A, B);
 
@@ -93,23 +93,25 @@ std::vector<TimingAnalysis> MatrixOperators::analyze_timing_phi_series(const std
 
             auto sorted_matrix = sort_rows_by_ones(phi_theta);
 
-            yyc_instance.shouldDisplayTime = false;
-            yyc_instance.findTypicalTestors(phi_theta);
-            r.yyc_time_any_order = yyc_instance.getExecutionTime();
+            YYC yyc_any(r.cols);
+            yyc_any.shouldDisplayTime = false;
+            yyc_any.findTypicalTestors(phi_theta);
+            r.yyc_time_any_order = yyc_any.getExecutionTime() / 1e6;
 
             YYC yyc_sorted(r.cols);
             yyc_sorted.shouldDisplayTime = false;
             yyc_sorted.findTypicalTestors(sorted_matrix);
-            r.yyc_time_sorted_ones = yyc_sorted.getExecutionTime();
-            std::cout <<  yyc_sorted.getExecutionTime();
-            bt_instance.shouldDisplayTime = false;
-            bt_instance.findTypicalTestors(phi_theta);
-            r.bt_time_any_order = bt_instance.getExecutionTime();
+            r.yyc_time_sorted_ones = yyc_sorted.getExecutionTime() / 1e6;
+
+            BT bt_any(r.cols);
+            bt_any.shouldDisplayTime = false;
+            bt_any.findTypicalTestors(phi_theta);
+            r.bt_time_any_order = bt_any.getExecutionTime() / 1e6;
 
             BT bt_sorted(r.cols);
             bt_sorted.shouldDisplayTime = false;
             bt_sorted.findTypicalTestors(sorted_matrix);
-            r.bt_time_sorted_ones = bt_sorted.getExecutionTime();
+            r.bt_time_sorted_ones = bt_sorted.getExecutionTime() / 1e6;
 
         } catch (const std::exception& e) {
 
@@ -119,7 +121,7 @@ std::vector<TimingAnalysis> MatrixOperators::analyze_timing_phi_series(const std
     return results;
 }
 
-std::vector<TimingAnalysis> MatrixOperators::analyze_timing_gamma_series(const std::vector<std::vector<int>>& A, const std::vector<std::vector<int>>& B, const std::vector<std::vector<int>>& typical_testors_A, const std::vector<std::vector<int>>& typical_testors_B, int max_N, YYC& yyc_instance, BT& bt_instance) {
+std::vector<TimingAnalysis> MatrixOperators::analyze_timing_gamma_series(const std::vector<std::vector<int>>& A, const std::vector<std::vector<int>>& B, const std::vector<std::vector<int>>& typical_testors_A, const std::vector<std::vector<int>>& typical_testors_B, int max_N) {
     std::vector<TimingAnalysis> results;
     auto base_matrix = theta_operator(A, B);
 
@@ -140,24 +142,25 @@ std::vector<TimingAnalysis> MatrixOperators::analyze_timing_gamma_series(const s
 
             auto sorted_matrix = sort_rows_by_ones(current_matrix);
 
-            yyc_instance.shouldDisplayTime = false;
-            yyc_instance.findTypicalTestors(current_matrix);
-            r.yyc_time_any_order = yyc_instance.getExecutionTime() / 1e6;
+            YYC yyc_any(r.cols);
+            yyc_any.shouldDisplayTime = false;
+            yyc_any.findTypicalTestors(current_matrix);
+            r.yyc_time_any_order = yyc_any.getExecutionTime() / 1e6;
 
             YYC yyc_sorted(r.cols);
             yyc_sorted.shouldDisplayTime = false;
             yyc_sorted.findTypicalTestors(sorted_matrix);
             r.yyc_time_sorted_ones = yyc_sorted.getExecutionTime() / 1e6;
 
-            bt_instance.shouldDisplayTime = false;
-            
-            bt_instance.findTypicalTestors(current_matrix);
-            r.bt_time_any_order = bt_instance.getExecutionTime() / 1e6 ;
+            BT bt_any(r.cols);
+            bt_any.shouldDisplayTime = false;
+            bt_any.findTypicalTestors(current_matrix);
+            r.bt_time_any_order = bt_any.getExecutionTime() / 1e6;
 
             BT bt_sorted(r.cols);
             bt_sorted.shouldDisplayTime = false;
             bt_sorted.findTypicalTestors(sorted_matrix);
-            r.bt_time_sorted_ones = bt_sorted.getExecutionTime() / 1e6 ;
+            r.bt_time_sorted_ones = bt_sorted.getExecutionTime() / 1e6;
 
         } 
         catch(std::exception a)
