@@ -6,6 +6,7 @@
 class YYC {
 public:
 bool shouldDisplayTime{true};
+bool suppressTimingLogs{false};
     // Constructor por defecto
     YYC(int col);
     long long getVisitedNodes() const { return visitedNodes; }  

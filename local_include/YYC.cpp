@@ -28,7 +28,7 @@ std::vector<std::vector<int>> typicalTestors;
     if (matrix.empty()) {
         auto duration = std::chrono::duration_cast<std::chrono::microseconds>(
             std::chrono::steady_clock::now() - globalStart);
-        if (shouldDisplayTime) {
+        if (shouldDisplayTime && !suppressTimingLogs) {
             std::cout << "Tiempo total de ejecución YYC: " << duration.count() << " microseconds" << std::endl;
         }
         return typicalTestors;
@@ -127,7 +127,7 @@ std::vector<std::vector<int>> typicalTestors;
     lastTestorTime = currentTime;
     currentAmountOfTestors++;
     
-    if(shouldDisplayTime)
+    if(shouldDisplayTime && !suppressTimingLogs)
     {
 
         std::cout << "  Tiempo elapsado desde anterior testor: " << timeSinceLast << " microseconds" << std::endl;
@@ -147,7 +147,7 @@ std::vector<std::vector<int>> typicalTestors;
 
     executionTimeMicroseconds = totalDuration.count();
 
-    if(shouldDisplayTime)
+    if(shouldDisplayTime && !suppressTimingLogs)
     {
         std::cout << "Tiempo total de ejecución YYC: " << totalDuration.count() << " microseconds" << std::endl;
     }

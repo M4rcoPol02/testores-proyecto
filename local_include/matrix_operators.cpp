@@ -100,11 +100,13 @@ std::vector<TimingAnalysis> MatrixOperators::analyze_timing_phi_series(const std
 
             YYC yyc_any_order(r.cols);
             yyc_any_order.shouldDisplayTime = false;
+            yyc_any_order.suppressTimingLogs = true;
             yyc_any_order.findTypicalTestors(phi_theta);
             r.yyc_time_any_order = yyc_any_order.getExecutionTime() / 1e6;
 
             YYC yyc_sorted(r.cols);
             yyc_sorted.shouldDisplayTime = false;
+            yyc_sorted.suppressTimingLogs = true;
             yyc_sorted.findTypicalTestors(sorted_matrix);
             r.yyc_time_sorted_ones = yyc_sorted.getExecutionTime() / 1e6;
 
@@ -156,11 +158,13 @@ std::vector<TimingAnalysis> MatrixOperators::analyze_timing_gamma_series(const s
 
             YYC yyc_any_order(r.cols);
             yyc_any_order.shouldDisplayTime = false;
+            yyc_any_order.suppressTimingLogs = true;
             yyc_any_order.findTypicalTestors(current_matrix);
             r.yyc_time_any_order = yyc_any_order.getExecutionTime() / 1e6;
 
             YYC yyc_sorted(r.cols);
             yyc_sorted.shouldDisplayTime = false;
+            yyc_sorted.suppressTimingLogs = true;
             yyc_sorted.findTypicalTestors(sorted_matrix);
             r.yyc_time_sorted_ones = yyc_sorted.getExecutionTime() / 1e6;
 
