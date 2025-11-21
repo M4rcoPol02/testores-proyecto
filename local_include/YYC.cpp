@@ -28,7 +28,9 @@ std::vector<std::vector<int>> typicalTestors;
     if (matrix.empty()) {
         auto duration = std::chrono::duration_cast<std::chrono::microseconds>(
             std::chrono::steady_clock::now() - globalStart);
-        std::cout << "Tiempo total de ejecución YYC: " << duration.count() << " microseconds" << std::endl;
+        if (shouldDisplayTime) {
+            std::cout << "Tiempo total de ejecución YYC: " << duration.count() << " microseconds" << std::endl;
+        }
         return typicalTestors;
     }
     size_t totalRows = matrix.size();
@@ -135,10 +137,9 @@ std::vector<std::vector<int>> typicalTestors;
 
             } 
         }
-        shouldDisplayTime = true;
         // sustituir typicalTestors por los filtrados
         typicalTestors.swap(filtered);
-        
+
     }
 
     auto totalDuration = std::chrono::duration_cast<std::chrono::microseconds>(
