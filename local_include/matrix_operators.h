@@ -22,20 +22,12 @@ public:
     // Operadores
     static std::vector<std::vector<int>> phi_operator(const std::vector<std::vector<int>>&, int N);
     static std::vector<std::vector<int>> theta_operator(const std::vector<std::vector<int>>&, const std::vector<std::vector<int>>&);
-    static std::vector<std::vector<int>> gamma_operator(const std::vector<std::vector<int>>&, const std::vector<std::vector<int>>&);
-    static std::vector<std::vector<int>> gamma_power(const std::vector<std::vector<int>>&, int N);
 
     // Predicciones
     static int predict_phi_theta_testors_count(const std::vector<std::vector<int>>&, const std::vector<std::vector<int>>&, int N);
-    static int predict_gamma_theta_testors_count(const std::vector<std::vector<int>>&, const std::vector<std::vector<int>>&, int N);
 
     // Análisis de tiempo
     static std::vector<TimingAnalysis> analyze_timing_phi_series(
-        const std::vector<std::vector<int>>&, const std::vector<std::vector<int>>&,
-        const std::vector<std::vector<int>>&, const std::vector<std::vector<int>>&,
-        int max_N, bool verbose = false);
-
-    static std::vector<TimingAnalysis> analyze_timing_gamma_series(
         const std::vector<std::vector<int>>&, const std::vector<std::vector<int>>&,
         const std::vector<std::vector<int>>&, const std::vector<std::vector<int>>&,
         int max_N, bool verbose = false);

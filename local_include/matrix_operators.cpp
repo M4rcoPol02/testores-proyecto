@@ -37,43 +37,11 @@ std::vector<std::vector<int>> MatrixOperators::theta_operator(const std::vector<
     return result;
 }
 
-std::vector<std::vector<int>> MatrixOperators::gamma_operator(const std::vector<std::vector<int>>& A, const std::vector<std::vector<int>>& B) {
-    if (A.empty() || B.empty()) throw std::invalid_argument("Matrices vacías");
-    int colsA = count_cols(A);
-    int colsB = count_cols(B);
-    std::vector<std::vector<int>> result;
-    for (const auto& rowA : A) {
-        std::vector<int> new_row = rowA;
-        new_row.insert(new_row.end(), colsB, 0);
-        result.push_back(new_row);
-    }
-    for (const auto& rowB : B) {
-        std::vector<int> new_row(colsA, 0);
-        new_row.insert(new_row.end(), rowB.begin(), rowB.end());
-        result.push_back(new_row);
-    }
-    return result;
-}
-
-std::vector<std::vector<int>> MatrixOperators::gamma_power(const std::vector<std::vector<int>>& A, int N) {
-    if (N < 1) throw std::invalid_argument("N debe ser >= 1");
-    std::vector<std::vector<int>> result = A;
-    for (int i = 1; i < N; ++i) {
-        result = gamma_operator(result, A);
-    }
-    return result;
-}
-
 int MatrixOperators::predict_phi_theta_testors_count(const std::vector<std::vector<int>>& typical_testors_A, const std::vector<std::vector<int>>& typical_testors_B, int N) {
     int total = 0;
     for (const auto& testor : typical_testors_A) total += static_cast<int>(std::pow(N, testor.size()));
     for (const auto& testor : typical_testors_B) total += static_cast<int>(std::pow(N, testor.size()));
     return total;
-}
-
-int MatrixOperators::predict_gamma_theta_testors_count(const std::vector<std::vector<int>>& typical_testors_A, const std::vector<std::vector<int>>& typical_testors_B, int N) {
-    int base_testors = typical_testors_A.size() + typical_testors_B.size();
-    return static_cast<int>(std::pow(base_testors, N));
 }
 
 std::vector<TimingAnalysis> MatrixOperators::analyze_timing_phi_series(const std::vector<std::vector<int>>& A, const std::vector<std::vector<int>>& B, const std::vector<std::vector<int>>& typical_testors_A, const std::vector<std::vector<int>>& typical_testors_B, int max_N, bool verbose) {
@@ -123,66 +91,6 @@ std::vector<TimingAnalysis> MatrixOperators::analyze_timing_phi_series(const std
         } catch (const std::exception& e) {
             if (verbose) {
                 std::cerr << "[phi] N=" << N << " failed: " << e.what() << std::endl;
-            }
-        }
-        results.push_back(r);
-    }
-    return results;
-}
-
-std::vector<TimingAnalysis> MatrixOperators::analyze_timing_gamma_series(const std::vector<std::vector<int>>& A, const std::vector<std::vector<int>>& B, const std::vector<std::vector<int>>& typical_testors_A, const std::vector<std::vector<int>>& typical_testors_B, int max_N, bool verbose) {
-    std::vector<TimingAnalysis> results;
-    auto base_matrix = theta_operator(A, B);
-
-    for (int N = 1; N <= max_N; ++N) {
-        TimingAnalysis r;
-        r.N = N;
-        r.matrix_formula = "gamma^" + std::to_string(N) + "(theta(A,B))";
-
-        try
-        {
-            auto current_matrix = base_matrix;
-            for (int i = 1; i < N; ++i) {
-                current_matrix = gamma_operator(current_matrix, base_matrix);
-            }
-            r.rows = count_rows(current_matrix);
-            r.cols = count_cols(current_matrix);
-            r.predicted_testors = predict_gamma_theta_testors_count(typical_testors_A, typical_testors_B, N);
-
-            if (verbose) {
-                std::cout << "[gamma] N=" << N << " -> " << r.rows << "x" << r.cols
-                          << " |Psi*|=" << r.predicted_testors << std::endl;
-            }
-
-            auto sorted_matrix = sort_rows_by_ones(current_matrix);
-
-            YYC yyc_any_order(r.cols);
-            yyc_any_order.shouldDisplayTime = false;
-            yyc_any_order.suppressTimingLogs = true;
-            yyc_any_order.findTypicalTestors(current_matrix);
-            r.yyc_time_any_order = yyc_any_order.getExecutionTime() / 1e6;
-
-            YYC yyc_sorted(r.cols);
-            yyc_sorted.shouldDisplayTime = false;
-            yyc_sorted.suppressTimingLogs = true;
-            yyc_sorted.findTypicalTestors(sorted_matrix);
-            r.yyc_time_sorted_ones = yyc_sorted.getExecutionTime() / 1e6;
-
-            BT bt_any_order(r.cols);
-            bt_any_order.shouldDisplayTime = false;
-            bt_any_order.findTypicalTestors(current_matrix);
-            r.bt_time_any_order = bt_any_order.getExecutionTime() / 1e6 ;
-
-            BT bt_sorted(r.cols);
-            bt_sorted.shouldDisplayTime = false;
-            bt_sorted.findTypicalTestors(sorted_matrix);
-            r.bt_time_sorted_ones = bt_sorted.getExecutionTime() / 1e6 ;
-
-        } 
-        catch(const std::exception& e)
-        {
-            if (verbose) {
-                std::cerr << "[gamma] N=" << N << " failed: " << e.what() << std::endl;
             }
         }
         results.push_back(r);

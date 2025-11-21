@@ -301,10 +301,6 @@ void createSection52Tables() {
     auto phiResults = MatrixOperators::analyze_timing_phi_series(matrixA, matrixB, testorsA, testorsB, 5, true);
     cout << MatrixOperators::format_timing_table(phiResults) << endl;
 
-    cout << "\n--- TABLA 5.2.2: OPERADOR GAMMA (γ^N(θ(A,B))) ---\n";
-    auto gammaResults = MatrixOperators::analyze_timing_gamma_series(matrixA, matrixB, testorsA, testorsB, 4, true);
-    cout << MatrixOperators::format_timing_table(gammaResults) << endl;
-    
     cout << "=== TABLAS SECCION 5.2 COMPLETADAS ===\n";
 }
 
