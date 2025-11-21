@@ -10,7 +10,7 @@ struct TimingAnalysis {
     std::string matrix_formula;
     int rows;
     int cols;
-    int predicted_testors;
+    long long predicted_testors;
     double yyc_time_any_order;
     double yyc_time_sorted_ones;
     double bt_time_any_order;
@@ -24,10 +24,10 @@ public:
     static std::vector<std::vector<int>> theta_operator(const std::vector<std::vector<int>>&, const std::vector<std::vector<int>>&);
 
     // Predicciones
-    static int predict_phi_theta_testors_count(const std::vector<std::vector<int>>&, const std::vector<std::vector<int>>&, int N);
+    static long long predict_phi_theta_testors_count(const std::vector<std::vector<int>>&, const std::vector<std::vector<int>>&, int N);
 
     static std::string describe_phi_theta_prediction(
-        const std::vector<std::vector<int>>&, const std::vector<std::vector<int>>&, int N, int predicted_total);
+        const std::vector<std::vector<int>>&, const std::vector<std::vector<int>>&, int N, long long predicted_total);
 
     // Análisis de tiempo
     static std::vector<TimingAnalysis> analyze_timing_phi_series(

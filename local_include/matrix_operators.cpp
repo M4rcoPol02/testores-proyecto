@@ -37,10 +37,18 @@ std::vector<std::vector<int>> MatrixOperators::theta_operator(const std::vector<
     return result;
 }
 
-int MatrixOperators::predict_phi_theta_testors_count(const std::vector<std::vector<int>>& typical_testors_A, const std::vector<std::vector<int>>& typical_testors_B, int N) {
-    int total = 0;
-    for (const auto& testor : typical_testors_A) total += static_cast<int>(std::pow(N, testor.size()));
-    for (const auto& testor : typical_testors_B) total += static_cast<int>(std::pow(N, testor.size()));
+static long long variants_per_testor(int N, size_t testor_size) {
+    long long result = 1;
+    for (size_t i = 0; i < testor_size; ++i) {
+        result *= N; // each column has N equivalent copies under phi^N
+    }
+    return result;
+}
+
+long long MatrixOperators::predict_phi_theta_testors_count(const std::vector<std::vector<int>>& typical_testors_A, const std::vector<std::vector<int>>& typical_testors_B, int N) {
+    long long total = 0;
+    for (const auto& testor : typical_testors_A) total += variants_per_testor(N, testor.size());
+    for (const auto& testor : typical_testors_B) total += variants_per_testor(N, testor.size());
     return total;
 }
 
@@ -48,7 +56,7 @@ std::string MatrixOperators::describe_phi_theta_prediction(
     const std::vector<std::vector<int>>& typical_testors_A,
     const std::vector<std::vector<int>>& typical_testors_B,
     int N,
-    int predicted_total) {
+    long long predicted_total) {
     std::ostringstream oss;
 
     const auto base_A = typical_testors_A.size();
@@ -64,9 +72,11 @@ std::string MatrixOperators::describe_phi_theta_prediction(
     auto append_terms = [&](const std::vector<std::vector<int>>& src, const std::string& label) {
         for (size_t i = 0; i < src.size(); ++i) {
             const auto size = src[i].size();
-            const auto term = static_cast<int>(std::pow(N, size));
+            const auto term = variants_per_testor(N, size);
             if (!first_term) oss << " + ";
-            oss << label << i + 1 << ": " << N << "^" << size << "=" << term;
+            oss << label << i + 1 << ": " << N << "^" << size << "=" << term
+                << " (N opciones por cada una de las " << size
+                << " columnas del testor)";
             first_term = false;
         }
     };
