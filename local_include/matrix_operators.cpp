@@ -96,22 +96,22 @@ std::vector<TimingAnalysis> MatrixOperators::analyze_timing_phi_series(const std
             YYC yyc_any_order(r.cols);
             yyc_any_order.shouldDisplayTime = false;
             yyc_any_order.findTypicalTestors(phi_theta);
-            r.yyc_time_any_order = yyc_any_order.getExecutionTime();
+            r.yyc_time_any_order = yyc_any_order.getExecutionTime() / 1e6;
 
             YYC yyc_sorted(r.cols);
             yyc_sorted.shouldDisplayTime = false;
             yyc_sorted.findTypicalTestors(sorted_matrix);
-            r.yyc_time_sorted_ones = yyc_sorted.getExecutionTime();
+            r.yyc_time_sorted_ones = yyc_sorted.getExecutionTime() / 1e6;
 
             BT bt_any_order(r.cols);
             bt_any_order.shouldDisplayTime = false;
             bt_any_order.findTypicalTestors(phi_theta);
-            r.bt_time_any_order = bt_any_order.getExecutionTime();
+            r.bt_time_any_order = bt_any_order.getExecutionTime() / 1e6;
 
             BT bt_sorted(r.cols);
             bt_sorted.shouldDisplayTime = false;
             bt_sorted.findTypicalTestors(sorted_matrix);
-            r.bt_time_sorted_ones = bt_sorted.getExecutionTime();
+            r.bt_time_sorted_ones = bt_sorted.getExecutionTime() / 1e6;
 
         } catch (const std::exception& e) {
 
