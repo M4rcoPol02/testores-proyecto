@@ -31,14 +31,14 @@ public:
 
     // Análisis de tiempo
     static std::vector<TimingAnalysis> analyze_timing_phi_series(
-        const std::vector<std::vector<int>>&, const std::vector<std::vector<int>>&, 
-        const std::vector<std::vector<int>>&, const std::vector<std::vector<int>>&, 
-        int max_N, YYC& yyc_instance, BT& bt_instance);
+        const std::vector<std::vector<int>>&, const std::vector<std::vector<int>>&,
+        const std::vector<std::vector<int>>&, const std::vector<std::vector<int>>&,
+        int max_N);
 
     static std::vector<TimingAnalysis> analyze_timing_gamma_series(
-        const std::vector<std::vector<int>>&, const std::vector<std::vector<int>>&, 
-        const std::vector<std::vector<int>>&, const std::vector<std::vector<int>>&, 
-        int max_N, YYC& yyc_instance, BT& bt_instance);
+        const std::vector<std::vector<int>>&, const std::vector<std::vector<int>>&,
+        const std::vector<std::vector<int>>&, const std::vector<std::vector<int>>&,
+        int max_N);
 
     // Herramientas auxiliares
     static int count_rows(const std::vector<std::vector<int>>&);
