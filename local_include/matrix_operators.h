@@ -33,12 +33,12 @@ public:
     static std::vector<TimingAnalysis> analyze_timing_phi_series(
         const std::vector<std::vector<int>>&, const std::vector<std::vector<int>>&,
         const std::vector<std::vector<int>>&, const std::vector<std::vector<int>>&,
-        int max_N);
+        int max_N, bool verbose = false);
 
     static std::vector<TimingAnalysis> analyze_timing_gamma_series(
         const std::vector<std::vector<int>>&, const std::vector<std::vector<int>>&,
         const std::vector<std::vector<int>>&, const std::vector<std::vector<int>>&,
-        int max_N);
+        int max_N, bool verbose = false);
 
     // Herramientas auxiliares
     static int count_rows(const std::vector<std::vector<int>>&);

@@ -76,7 +76,7 @@ int MatrixOperators::predict_gamma_theta_testors_count(const std::vector<std::ve
     return static_cast<int>(std::pow(base_testors, N));
 }
 
-std::vector<TimingAnalysis> MatrixOperators::analyze_timing_phi_series(const std::vector<std::vector<int>>& A, const std::vector<std::vector<int>>& B, const std::vector<std::vector<int>>& typical_testors_A, const std::vector<std::vector<int>>& typical_testors_B, int max_N) {
+std::vector<TimingAnalysis> MatrixOperators::analyze_timing_phi_series(const std::vector<std::vector<int>>& A, const std::vector<std::vector<int>>& B, const std::vector<std::vector<int>>& typical_testors_A, const std::vector<std::vector<int>>& typical_testors_B, int max_N, bool verbose) {
     std::vector<TimingAnalysis> results;
     auto theta_AB = theta_operator(A, B);
 
@@ -90,6 +90,11 @@ std::vector<TimingAnalysis> MatrixOperators::analyze_timing_phi_series(const std
             r.rows = count_rows(phi_theta);
             r.cols = count_cols(phi_theta);
             r.predicted_testors = predict_phi_theta_testors_count(typical_testors_A, typical_testors_B, N);
+
+            if (verbose) {
+                std::cout << "[phi] N=" << N << " -> " << r.rows << "x" << r.cols
+                          << " |Psi*|=" << r.predicted_testors << std::endl;
+            }
 
             auto sorted_matrix = sort_rows_by_ones(phi_theta);
 
@@ -114,14 +119,16 @@ std::vector<TimingAnalysis> MatrixOperators::analyze_timing_phi_series(const std
             r.bt_time_sorted_ones = bt_sorted.getExecutionTime() / 1e6;
 
         } catch (const std::exception& e) {
-
+            if (verbose) {
+                std::cerr << "[phi] N=" << N << " failed: " << e.what() << std::endl;
+            }
         }
         results.push_back(r);
     }
     return results;
 }
 
-std::vector<TimingAnalysis> MatrixOperators::analyze_timing_gamma_series(const std::vector<std::vector<int>>& A, const std::vector<std::vector<int>>& B, const std::vector<std::vector<int>>& typical_testors_A, const std::vector<std::vector<int>>& typical_testors_B, int max_N) {
+std::vector<TimingAnalysis> MatrixOperators::analyze_timing_gamma_series(const std::vector<std::vector<int>>& A, const std::vector<std::vector<int>>& B, const std::vector<std::vector<int>>& typical_testors_A, const std::vector<std::vector<int>>& typical_testors_B, int max_N, bool verbose) {
     std::vector<TimingAnalysis> results;
     auto base_matrix = theta_operator(A, B);
 
@@ -139,6 +146,11 @@ std::vector<TimingAnalysis> MatrixOperators::analyze_timing_gamma_series(const s
             r.rows = count_rows(current_matrix);
             r.cols = count_cols(current_matrix);
             r.predicted_testors = predict_gamma_theta_testors_count(typical_testors_A, typical_testors_B, N);
+
+            if (verbose) {
+                std::cout << "[gamma] N=" << N << " -> " << r.rows << "x" << r.cols
+                          << " |Psi*|=" << r.predicted_testors << std::endl;
+            }
 
             auto sorted_matrix = sort_rows_by_ones(current_matrix);
 
@@ -163,9 +175,11 @@ std::vector<TimingAnalysis> MatrixOperators::analyze_timing_gamma_series(const s
             r.bt_time_sorted_ones = bt_sorted.getExecutionTime() / 1e6 ;
 
         } 
-        catch(std::exception a)
+        catch(const std::exception& e)
         {
-
+            if (verbose) {
+                std::cerr << "[gamma] N=" << N << " failed: " << e.what() << std::endl;
+            }
         }
         results.push_back(r);
     }
