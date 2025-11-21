@@ -26,6 +26,9 @@ public:
     // Predicciones
     static int predict_phi_theta_testors_count(const std::vector<std::vector<int>>&, const std::vector<std::vector<int>>&, int N);
 
+    static std::string describe_phi_theta_prediction(
+        const std::vector<std::vector<int>>&, const std::vector<std::vector<int>>&, int N, int predicted_total);
+
     // Análisis de tiempo
     static std::vector<TimingAnalysis> analyze_timing_phi_series(
         const std::vector<std::vector<int>>&, const std::vector<std::vector<int>>&,

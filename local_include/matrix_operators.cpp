@@ -44,6 +44,44 @@ int MatrixOperators::predict_phi_theta_testors_count(const std::vector<std::vect
     return total;
 }
 
+std::string MatrixOperators::describe_phi_theta_prediction(
+    const std::vector<std::vector<int>>& typical_testors_A,
+    const std::vector<std::vector<int>>& typical_testors_B,
+    int N,
+    int predicted_total) {
+    std::ostringstream oss;
+
+    const auto base_A = typical_testors_A.size();
+    const auto base_B = typical_testors_B.size();
+    const auto theta_base = base_A + base_B;
+
+    oss << "  Corolario 2: |Psi*(theta(A,B))| = |Psi*(A)| + |Psi*(B)| = " << base_A
+        << " + " << base_B << " = " << theta_base << "\n";
+
+    oss << "  Corolario 1: |Psi*(phi^" << N << "(theta(A,B)))| = ";
+
+    bool first_term = true;
+    auto append_terms = [&](const std::vector<std::vector<int>>& src, const std::string& label) {
+        for (size_t i = 0; i < src.size(); ++i) {
+            const auto size = src[i].size();
+            const auto term = static_cast<int>(std::pow(N, size));
+            if (!first_term) oss << " + ";
+            oss << label << i + 1 << ": " << N << "^" << size << "=" << term;
+            first_term = false;
+        }
+    };
+
+    append_terms(typical_testors_A, "A");
+    append_terms(typical_testors_B, "B");
+
+    if (first_term) {
+        oss << "0";
+    }
+
+    oss << " = " << predicted_total;
+    return oss.str();
+}
+
 std::vector<TimingAnalysis> MatrixOperators::analyze_timing_phi_series(const std::vector<std::vector<int>>& A, const std::vector<std::vector<int>>& B, const std::vector<std::vector<int>>& typical_testors_A, const std::vector<std::vector<int>>& typical_testors_B, int max_N, bool verbose) {
     std::vector<TimingAnalysis> results;
     auto theta_AB = theta_operator(A, B);
@@ -62,6 +100,7 @@ std::vector<TimingAnalysis> MatrixOperators::analyze_timing_phi_series(const std
             if (verbose) {
                 std::cout << "[phi] N=" << N << " -> " << r.rows << "x" << r.cols
                           << " |Psi*|=" << r.predicted_testors << std::endl;
+                std::cout << describe_phi_theta_prediction(typical_testors_A, typical_testors_B, N, r.predicted_testors) << std::endl;
             }
 
             auto sorted_matrix = sort_rows_by_ones(phi_theta);
