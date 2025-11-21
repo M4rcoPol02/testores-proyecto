@@ -9,4 +9,4 @@ Proyecto de matemáticas discretas para calcular testores típicos.
 
 ## Compilación
 ```bash
-g++ main.cpp local_include/Matrix.cpp local_include/YYC.cpp local_include/BT.cpp local_include/ExecutionTime.cpp -o programa
+g++ main.cpp local_include/Matrix.cpp local_include/YYC.cpp local_include/BT.cpp local_include/ExecutionTime.cpp local_include/matrix_operators.cpp -o programa

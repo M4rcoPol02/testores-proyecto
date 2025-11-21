@@ -5,15 +5,23 @@
 
 class YYC {
 public:
+bool shouldDisplayTime{true};
     // Constructor por defecto
     YYC(int col);
-
+    long long getVisitedNodes() const { return visitedNodes; }  
+    void resetVisitedNodesIfExists();
+    long long executionTimeMicroseconds = 0;
+    double getExecutionTime() const { return executionTimeMicroseconds; }
 
     // Retorna la lista de testores típicos (cada testor representado como vector de índices de columnas)
     // La matriz es una matriz booleana (0/1) organizada por filas: matrix[row][col]
     std::vector<std::vector<int>> findTypicalTestors(const std::vector<std::vector<int>>& matrix);
 
 private:
+    
+    long long visitedNodes = 0;   // NEW
+    
+
     int currentAmountOfTestors{};
     // Comprueba si en la submatriz formada por las columnas 'testor' (ya ordenadas)
     // y las filas hasta rowsUpTo (exclusive) existe un conjunto compatible

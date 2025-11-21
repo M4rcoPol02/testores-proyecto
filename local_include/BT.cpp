@@ -74,10 +74,11 @@ bool BT::isSuperset(uint64_t a, uint64_t b) const {
 std::vector<std::vector<int>>
 BT::findTypicalTestors(const std::vector<std::vector<int>>& MB)
 {
+    executionTimeMicroseconds = 0; 
+    auto globalStart = std::chrono::steady_clock::now();
+
     ExecutionTime t{"Tiempo de ejecuciónn BT"};
     if (MB.empty()) return {};
-    if ((int)MB[0].size() != n)
-        throw std::invalid_argument("MB columns != numColumns");
 
     uint64_t maxMask = (1ULL << n) - 1ULL;
 
@@ -192,6 +193,13 @@ BT::findTypicalTestors(const std::vector<std::vector<int>>& MB)
         }
         result.push_back(t);
     }
+
+    auto totalDuration = std::chrono::duration_cast<std::chrono::microseconds>(
+    std::chrono::steady_clock::now() - globalStart);
+
+    executionTimeMicroseconds = totalDuration.count();
+
+     executionTimeMicroseconds = totalDuration.count();
 
     return result;
 }

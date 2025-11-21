@@ -17,6 +17,7 @@ YYC::YYC(int algo)
 std::vector<std::vector<int>> YYC::findTypicalTestors(const std::vector<std::vector<int>>& matrix) {
 std::vector<std::vector<int>> typicalTestors;
 
+     executionTimeMicroseconds = 0; 
     auto globalStart = std::chrono::steady_clock::now();
     currentAmountOfTestors = 0;  // Reset counter
     
@@ -41,6 +42,7 @@ std::vector<std::vector<int>> typicalTestors;
     // Inicializa con las columnas que tienen '1' en la primera fila (r1)
     for (size_t col = 0; col < totalCols; ++col) {
         if (matrix[0][col] == 1) {
+            visitedNodes++;
             typicalTestors.push_back(std::vector<int>{static_cast<int>(col)});
 
 
@@ -78,6 +80,7 @@ std::vector<std::vector<int>> typicalTestors;
                         extended.push_back(static_cast<int>(newCol));
                         std::sort(extended.begin(), extended.end());
 
+                        visitedNodes++;
                         // findCompatibleSet debe considerar filas hasta row (inclusive) -> rowsUpTo = row+1
                         if (findCompatibleSet(extended, static_cast<int>(newCol), matrix, static_cast<int>(row + 1))) {
                             newTypicalTestors.push_back(extended);
@@ -115,16 +118,24 @@ std::vector<std::vector<int>> typicalTestors;
                 
                 filtered.push_back(cand);
                 if (row == totalRows - 1) { // Solo en la última iteración
-                    auto currentTime = std::chrono::steady_clock::now();
-                    auto timeSinceLast = std::chrono::duration_cast<std::chrono::microseconds>(
-                        currentTime - lastTestorTime).count();
-                    timesBetweenTestors.push_back(timeSinceLast);
-                    lastTestorTime = currentTime;
-                    currentAmountOfTestors++;
-                }
+    auto currentTime = std::chrono::steady_clock::now();
+    auto timeSinceLast = std::chrono::duration_cast<std::chrono::microseconds>(
+        currentTime - lastTestorTime).count();
+    timesBetweenTestors.push_back(timeSinceLast);
+    lastTestorTime = currentTime;
+    currentAmountOfTestors++;
+    
+    if(shouldDisplayTime)
+    {
+
+        std::cout << "  Tiempo elapsado desde anterior testor: " << timeSinceLast << " microseconds" << std::endl;
+    }
+}
+
+
             } 
         }
-
+        shouldDisplayTime = true;
         // sustituir typicalTestors por los filtrados
         typicalTestors.swap(filtered);
         
@@ -132,15 +143,21 @@ std::vector<std::vector<int>> typicalTestors;
 
     auto totalDuration = std::chrono::duration_cast<std::chrono::microseconds>(
     std::chrono::steady_clock::now() - globalStart);
-    std::cout << "Tiempo total de ejecución YYC: " << totalDuration.count() << " microseconds" << std::endl;
+
+    executionTimeMicroseconds = totalDuration.count();
+
+    if(shouldDisplayTime)
+    {
+        std::cout << "Tiempo total de ejecución YYC: " << totalDuration.count() << " microseconds" << std::endl;
+    }
 
     // MOSTRAR TIEMPOS ACUMULADOS ENTRE TESTORES (después del tiempo total)
     if (!timesBetweenTestors.empty()) {
-        std::cout << "Tiempos acumulados entre testores típicos:" << std::endl;
+
         long long accumulatedTime = 0;
         for (size_t i = 0; i < timesBetweenTestors.size(); i++) {
             accumulatedTime += timesBetweenTestors[i];
-            std::cout << "  Testor " << i + 1 << ": " << accumulatedTime << " microseconds" << std::endl;
+           
         }
     }
 
@@ -241,4 +258,9 @@ bool YYC::isSubsetStrict(const std::vector<int>& a, const std::vector<int>& b) {
         else return false; // elemento de a no en b
     }
     return (ia == a.size());
+}
+
+void YYC::resetVisitedNodesIfExists()
+{
+    visitedNodes = 0;
 }
